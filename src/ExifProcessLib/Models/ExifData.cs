@@ -89,6 +89,10 @@ namespace ExifProcessLib.Models
 
                             case ExifTag.XResolution:
                             case ExifTag.YResolution:
+                            case ExifTag.Gamma:
+                            case ExifTag.CompressedBitsPerPixel:
+                            case ExifTag.ExposureTime:
+                            case ExifTag.FNumber:
                                 var rationalVals = obj.Value.Split('/').Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
                                 return String.Format("{0:0.00}", (decimal)rationalVals[0] / rationalVals[1]);
 
@@ -120,7 +124,15 @@ namespace ExifProcessLib.Models
                                 var resolutionUnitTag = (ExifResolutionUnit)(UInt16.Parse(obj.Value));
                                 return GetDisplayString(resolutionUnitTag);
 
-                            // Up to http://www.cipa.jp/std/documents/e/DC-008-2012_E.pdf, p44
+                            case ExifTag.ColorSpace:
+                                var colorSpaceTag = (ExifColorSpace)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(colorSpaceTag);
+
+                            case ExifTag.ComponentConfiguration:
+                                var componentConfiguration = (ExifComponentConfiguration)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(componentConfiguration);
+
+                            // Up to http://www.cipa.jp/std/documents/e/DC-008-2012_E.pdf, p50
                             // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html also useful
 
                             default:
@@ -272,6 +284,16 @@ namespace ExifProcessLib.Models
             return ExifResolutionUnitStrings.ContainsKey(tag) ? ExifResolutionUnitStrings[tag] : tag.ToString();
         }
 
+        private static string GetDisplayString(ExifColorSpace tag)
+        {
+            return ExifColorSpaceStrings.ContainsKey(tag) ? ExifColorSpaceStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifComponentConfiguration tag)
+        {
+            return ExifComponentConfigurationStrings.ContainsKey(tag) ? ExifComponentConfigurationStrings[tag] : tag.ToString();
+        }
+
         private static readonly Dictionary<ExifCompression, string> ExifCompressionStrings = new Dictionary<ExifCompression, string>
         {
             {ExifCompression.Uncompressed,                                          "Uncompressed"},
@@ -390,6 +412,26 @@ namespace ExifProcessLib.Models
             {ExifResolutionUnit.None,   "None"},
             {ExifResolutionUnit.Inches, "inches"},
             {ExifResolutionUnit.Cm,     "cm"}
+        };
+
+        private static readonly Dictionary<ExifColorSpace, string> ExifColorSpaceStrings = new Dictionary<ExifColorSpace, string>
+        {
+            {ExifColorSpace.SRGB,           "sRGB"},
+            {ExifColorSpace.AdobeRGB,       "Adobe RGB"},
+            {ExifColorSpace.WideGamutRGB,   "Wide Gamut RGB"},
+            {ExifColorSpace.ICCProfile,     "ICC Profile"},
+            {ExifColorSpace.Uncalibrated,   "Uncalibrated"}
+        };
+
+        private static readonly Dictionary<ExifComponentConfiguration, string> ExifComponentConfigurationStrings = new Dictionary<ExifComponentConfiguration, string>
+        {
+            {ExifComponentConfiguration.None,   "-"},
+            {ExifComponentConfiguration.Y,      "Y"},
+            {ExifComponentConfiguration.Cb,     "Cb"},
+            {ExifComponentConfiguration.Cr,     "Cr"},
+            {ExifComponentConfiguration.R,      "R"},
+            {ExifComponentConfiguration.G,      "G"},
+            {ExifComponentConfiguration.B,      "B"},
         };
     }
 }
