@@ -43,9 +43,16 @@
     <Compile Include="Helpers\BufferHelper.cs" />
     <Compile Include="ImageIdentifier.cs" />
     <Compile Include="Models\Endianess.cs" />
+    <Compile Include="Models\ExifCompression.cs" />
     <Compile Include="Models\ExifData.cs" />
+    <Compile Include="Models\ExifLightSource.cs" />
+    <Compile Include="Models\ExifOrientation.cs" />
+    <Compile Include="Models\ExifPhotometricInterpretation.cs" />
+    <Compile Include="Models\ExifPlanarConfiguration.cs" />
+    <Compile Include="Models\ExifResolutionUnit.cs" />
     <Compile Include="Models\ExifTag.cs" />
     <Compile Include="Models\ExifValueType.cs" />
+    <Compile Include="Models\ExifYCbCrPositioning.cs" />
     <Compile Include="Models\GPSTag.cs" />
     <Compile Include="Models\IFDType.cs" />
     <Compile Include="Models\ImageIdentification.cs" />

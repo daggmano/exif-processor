@@ -89,7 +89,10 @@ namespace ExifProcessLib.Helpers
             var sb = new StringBuilder();
             for (var i = 0; i < length; i++)
             {
-                sb.Append((char) data[offset + i]);
+                if (data[offset + 1] != 0x00)
+                {
+                    sb.Append((char) data[offset + i]);
+                }
             }
 
             return sb.ToString();
