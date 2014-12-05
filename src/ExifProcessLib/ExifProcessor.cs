@@ -15,7 +15,7 @@ namespace ExifProcessLib
             _fileName = filename;
         }
 
-        public void ProcessImage()
+        public IEnumerable<ExifData> ProcessImage()
         {
             if (!File.Exists(_fileName))
             {
@@ -24,7 +24,7 @@ namespace ExifProcessLib
 
             using (var stream = File.OpenRead(_fileName))
             {
-                IEnumerable<ExifData> result;
+                IEnumerable<ExifData> result = null;
                 var fileType = ImageIdentifier.Identify(_fileName, stream);
                 switch (fileType.Type)
                 {
@@ -38,8 +38,9 @@ namespace ExifProcessLib
                         result = tiffExtract.Extract(stream);
                         break;
                 }
-            }
 
+                return result;
+            }
         }
     }
 }

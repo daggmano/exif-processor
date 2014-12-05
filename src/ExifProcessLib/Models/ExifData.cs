@@ -93,8 +93,26 @@ namespace ExifProcessLib.Models
                             case ExifTag.CompressedBitsPerPixel:
                             case ExifTag.ExposureTime:
                             case ExifTag.FNumber:
+                            case ExifTag.ApertureValue:
+                            case ExifTag.MaxApertureValue:
+                            case ExifTag.FocalLength:
+                            case ExifTag.FlashEnergy:
+                            case ExifTag.FlashEnergy2:
+                            case ExifTag.FocalPlaneXResolution:
+                            case ExifTag.FocalPlaneXResolution2:
+                            case ExifTag.FocalPlaneYResolution:
+                            case ExifTag.FocalPlaneYResolution2:
+                            case ExifTag.ExposureIndex:
+                            case ExifTag.ExposureIndex2:
+                            case ExifTag.DigitalZoomRatio:
                                 var rationalVals = obj.Value.Split('/').Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
                                 return String.Format("{0:0.00}", (decimal)rationalVals[0] / rationalVals[1]);
+
+                            case ExifTag.ShutterSpeedValue:
+                            case ExifTag.BrightnessValue:
+                            case ExifTag.ExposureBiasValue:
+                                var sRationalVals = obj.Value.Split('/').Select(x => x.Trim()).Select(Int32.Parse).ToArray();
+                                return String.Format("{0:0.00}", (decimal) sRationalVals[0]/sRationalVals[1]);
 
                             case ExifTag.WhitePoint:
                                 var whitePointVals = obj.Value.Split(',').SelectMany(x => x.Split('/')).Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
@@ -121,6 +139,8 @@ namespace ExifProcessLib.Models
                                 return String.Format("{0:0.00}, {1:0.00}, {2:0.00}, {3:0.00}, {4:0.00}, {5:0.00}", primaryChromaticity1, primaryChromaticity2, primaryChromaticity3, primaryChromaticity4, primaryChromaticity5, primaryChromaticity6);
 
                             case ExifTag.ResolutionUnit:
+                            case ExifTag.FocalPlaneResolutionUnit:
+                            case ExifTag.FocalPlaneResolutionUnit2:
                                 var resolutionUnitTag = (ExifResolutionUnit)(UInt16.Parse(obj.Value));
                                 return GetDisplayString(resolutionUnitTag);
 
@@ -132,8 +152,92 @@ namespace ExifProcessLib.Models
                                 var componentConfiguration = (ExifComponentConfiguration)(UInt16.Parse(obj.Value));
                                 return GetDisplayString(componentConfiguration);
 
-                            // Up to http://www.cipa.jp/std/documents/e/DC-008-2012_E.pdf, p50
-                            // http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/EXIF.html also useful
+                            case ExifTag.ExposureProgram:
+                                var exposureProgram = (ExifExposureProgram)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(exposureProgram);
+
+                            case ExifTag.SensitivityType:
+                                var sensitivityType = (ExifSensitivityType)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(sensitivityType);
+
+                            case ExifTag.SubjectDistance:
+                                var distanceVals = obj.Value.Split('/').Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
+                                if (distanceVals[0] == 0xFFFFFFFF)
+                                {
+                                    return "Infinity";
+                                }
+                                if (distanceVals[0] == 0)
+                                {
+                                    return "Unknown";
+                                }
+                                return String.Format("{0:0.00}", (decimal)distanceVals[0] / distanceVals[1]);
+
+                            case ExifTag.MeteringMode:
+                                var meteringMode = (ExifMeteringMode)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(meteringMode);
+
+                            case ExifTag.Flash:
+                                var flash = (ExifFlash)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(flash);
+
+                            case ExifTag.SensingMethod:
+                            case ExifTag.SensingMethod2:
+                                var sensingMethod = (ExifSensingMethod)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(sensingMethod);
+
+                            case ExifTag.ExposureMode:
+                                var exposureMode = (ExifExposureMode)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(exposureMode);
+
+                            case ExifTag.WhiteBalance:
+                            case ExifTag.WhiteBalance2:
+                                var whiteBalance = (ExifWhiteBalance)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(whiteBalance);
+
+                            case ExifTag.SceneCaptureType:
+                                var sceneCaptureType = (ExifSceneCaptureType)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(sceneCaptureType);
+
+                            case ExifTag.GainControl:
+                                var gainControl = (ExifGainControl)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(gainControl);
+
+                            case ExifTag.Contrast:
+                            case ExifTag.Contrast2:
+                            case ExifTag.Saturation:
+                            case ExifTag.Saturation2:
+                                var contrastSaturation = (ExifContrastSaturation)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(contrastSaturation);
+
+                            case ExifTag.Sharpness:
+                            case ExifTag.Sharpness2:
+                                var contrast = (ExifSharpness)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(contrast);
+
+                            case ExifTag.SubjectDistanceRange:
+                                var subjectDistanceRange = (ExifSubjectDistanceRange)(UInt16.Parse(obj.Value));
+                                return GetDisplayString(subjectDistanceRange);
+
+                            case ExifTag.LensSpecification:
+                                var lensSpecVals = obj.Value.Split(',').SelectMany(x => x.Split('/')).Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
+                                var minLen = (decimal)lensSpecVals[0] / lensSpecVals[1];
+                                var maxLen = (decimal)lensSpecVals[2] / lensSpecVals[3];
+                                var minF = (lensSpecVals[5] == 0) ? 0 : (decimal)lensSpecVals[4] / lensSpecVals[5];
+                                var maxF = (lensSpecVals[7] == 0) ? 0 : (decimal)lensSpecVals[6] / lensSpecVals[7];
+                                var res = String.Format("{0}mm - {1}mm", minLen, maxLen);
+                                if (minF != 0)
+                                {
+                                    res += String.Format("f/{0}", minF);
+                                    if (maxF != 0)
+                                    {
+                                        res += String.Format(" - f/{0}", maxF);
+                                    }
+                                }
+                                else if (maxF != 0)
+                                {
+                                    res += String.Format("f/{0}", maxF);
+                                }
+                                return res;
 
                             default:
                                 return obj.Value;
@@ -294,6 +398,66 @@ namespace ExifProcessLib.Models
             return ExifComponentConfigurationStrings.ContainsKey(tag) ? ExifComponentConfigurationStrings[tag] : tag.ToString();
         }
 
+        private static string GetDisplayString(ExifExposureProgram tag)
+        {
+            return ExifExposureProgramStrings.ContainsKey(tag) ? ExifExposureProgramStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifSensitivityType tag)
+        {
+            return ExifSensitivityTypeStrings.ContainsKey(tag) ? ExifSensitivityTypeStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifMeteringMode tag)
+        {
+            return ExifMeteringModeStrings.ContainsKey(tag) ? ExifMeteringModeStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifFlash tag)
+        {
+            return ExifFlashStrings.ContainsKey(tag) ? ExifFlashStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifSensingMethod tag)
+        {
+            return ExifSensingMethodStrings.ContainsKey(tag) ? ExifSensingMethodStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifExposureMode tag)
+        {
+            return ExifExposureModeStrings.ContainsKey(tag) ? ExifExposureModeStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifWhiteBalance tag)
+        {
+            return ExifWhiteBalanceStrings.ContainsKey(tag) ? ExifWhiteBalanceStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifSceneCaptureType tag)
+        {
+            return ExifSceneCaptureTypeStrings.ContainsKey(tag) ? ExifSceneCaptureTypeStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifGainControl tag)
+        {
+            return ExifGainControlStrings.ContainsKey(tag) ? ExifGainControlStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifContrastSaturation tag)
+        {
+            return ExifContrastSaturationStrings.ContainsKey(tag) ? ExifContrastSaturationStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifSharpness tag)
+        {
+            return ExifSharpnessStrings.ContainsKey(tag) ? ExifSharpnessStrings[tag] : tag.ToString();
+        }
+
+        private static string GetDisplayString(ExifSubjectDistanceRange tag)
+        {
+            return ExifSubjectDistanceRangeStrings.ContainsKey(tag) ? ExifSubjectDistanceRangeStrings[tag] : tag.ToString();
+        }
+
         private static readonly Dictionary<ExifCompression, string> ExifCompressionStrings = new Dictionary<ExifCompression, string>
         {
             {ExifCompression.Uncompressed,                                          "Uncompressed"},
@@ -411,7 +575,9 @@ namespace ExifProcessLib.Models
         {
             {ExifResolutionUnit.None,   "None"},
             {ExifResolutionUnit.Inches, "inches"},
-            {ExifResolutionUnit.Cm,     "cm"}
+            {ExifResolutionUnit.Cm,     "cm"},
+            {ExifResolutionUnit.Mm,     "mm"},
+            {ExifResolutionUnit.Um,     "μm"}
         };
 
         private static readonly Dictionary<ExifColorSpace, string> ExifColorSpaceStrings = new Dictionary<ExifColorSpace, string>
@@ -432,6 +598,138 @@ namespace ExifProcessLib.Models
             {ExifComponentConfiguration.R,      "R"},
             {ExifComponentConfiguration.G,      "G"},
             {ExifComponentConfiguration.B,      "B"},
+        };
+
+        private static readonly Dictionary<ExifExposureProgram, string> ExifExposureProgramStrings = new Dictionary<ExifExposureProgram, string>
+        {
+            {ExifExposureProgram.NotDefined,                "Not Defined"},     
+            {ExifExposureProgram.Manual,                    "Manual"},
+            {ExifExposureProgram.ProgramAE,                 "Program AE"},
+            {ExifExposureProgram.AperturePriorityAE,        "Aperture-priority AE"},
+            {ExifExposureProgram.ShutterSpeedPriorityAE,    "Shutter speed priority AE"},
+            {ExifExposureProgram.CreativeSlowSpeed,         "Creative (Slow speed)"},
+            {ExifExposureProgram.ActionHighSpeed,           "Action (High speed)"},
+            {ExifExposureProgram.Portrait,                  "Portrait"},
+            {ExifExposureProgram.Landscape,                 "Landscape"},
+            {ExifExposureProgram.Bulb,                      "Bulb"}
+        };
+
+        private static readonly Dictionary<ExifSensitivityType, string> ExifSensitivityTypeStrings = new Dictionary<ExifSensitivityType, string>
+        {
+            {ExifSensitivityType.Unknown,                                                   "Unknown"},
+            {ExifSensitivityType.StandardOutputSensitivity,                                 "Standard Output Sensitivity"},
+            {ExifSensitivityType.RecommendedExposureIndex,                                  "Recommended Exposure Index"},
+            {ExifSensitivityType.ISOSpeed,                                                  "ISO Speed"},
+            {ExifSensitivityType.StandardOutputSensitivityRecommendedExposureIndex,         "Standard Output Sensitivity and Recommended Exposure Index"},
+            {ExifSensitivityType.StandardOutputSensitivityISOSpeed,                         "Standard Output Sensitivity and ISO Speed"},
+            {ExifSensitivityType.RecommendedExposureIndexISOSpeed,                          "Recommended Exposure Index and ISO Speed"},
+            {ExifSensitivityType.StandardOutputSensitivityRecommendedExposureIndexISOSpeed, "Standard Output Sensitivity, Recommended Exposure Index and ISO Speed"}
+        };
+
+        private static readonly Dictionary<ExifMeteringMode, string> ExifMeteringModeStrings = new Dictionary<ExifMeteringMode, string>
+        {
+            {ExifMeteringMode.Unknown,                  "Unknown"},
+            {ExifMeteringMode.Average,                  "Average"},
+            {ExifMeteringMode.CenterWeightedAverage,    "Center-weighted average"},
+            {ExifMeteringMode.Spot,                     "Spot"},
+            {ExifMeteringMode.MultiSpot,                "Multi-spot"},
+            {ExifMeteringMode.MultiSegment,             "Multi-segment"},
+            {ExifMeteringMode.Partial,                  "Partial"},
+            {ExifMeteringMode.Other,                    "Other"}
+        };
+
+        private static readonly Dictionary<ExifFlash, string> ExifFlashStrings = new Dictionary<ExifFlash, string>
+        {
+            {ExifFlash.NoFlash,                             "No Flash"},
+            {ExifFlash.Fired,                               "Fired"},
+            {ExifFlash.FiredNoReturn,                       "Fired, Return not detected"},
+            {ExifFlash.FiredReturn,                         "Fired, Return detected"},
+            {ExifFlash.OnDidNotFire,                        "On, Did not fire"},
+            {ExifFlash.OnFired,                             "On, Fired"},
+            {ExifFlash.OnNoReturn,                          "On, Return not detected"},
+            {ExifFlash.OnReturn,                            "On, Return detected"},
+            {ExifFlash.OffDidNotFire,                       "Off, Did not fire"},
+            {ExifFlash.OffDidNotFireNoReturn,               "Off, Did not fire, Return not detected"},
+            {ExifFlash.AutoDidNotFire,                      "Auto, Did not fire"},
+            {ExifFlash.AutoFired,                           "Auto, Fired"},
+            {ExifFlash.AutoFiredNoReturn,                   "Auto, Fired, Return not detected"},
+            {ExifFlash.AutoFiredReturn,                     "Auto, Fired, Return detected"},
+            {ExifFlash.NoFlashFunction,                     "No flash function"},
+            {ExifFlash.OffNoFlashFunction,                  "Off, No flash function"},
+            {ExifFlash.FiredRedEyeReduction,                "Fired, Red-eye reduction"},
+            {ExifFlash.FiredRedEyeReductionNoReturn,        "Fired, Red-eye reduction, Return not detected"},
+            {ExifFlash.FiredRedEyeReductionReturn,          "Fired, Red-eye reduction, Return detected"},
+            {ExifFlash.OnRedEyeReduction,                   "On, Red-eye reduction"},
+            {ExifFlash.OnRedEyeReductionNoReturn,           "On, Red-eye reduction, Return not detected"},
+            {ExifFlash.OnRedEyeReductionReturn,             "On, Red-eye reduction, Return detected"},
+            {ExifFlash.OffRedEyeReduction,                  "Off, Red-eye reduction"},
+            {ExifFlash.AutoDidNotFireRedEyeReduction,       "Auto, Did not fire, Red-eye reduction"},
+            {ExifFlash.AutoFiredRedEyeReduction,            "Auto, Fired, Red-eye reduction"},
+            {ExifFlash.AutoFiredRedEyeReductionNoReturn,    "Auto, Fired, Red-eye reduction, Return not detected"},
+            {ExifFlash.AutoFiredRedEyeReductionReturn,      "Auto, Fired, Red-eye reduction, Return detected"}
+        };
+
+        private static readonly Dictionary<ExifSensingMethod, string> ExifSensingMethodStrings = new Dictionary<ExifSensingMethod, string>
+        {
+            {ExifSensingMethod.NotDefined,              "Not defined"},
+            {ExifSensingMethod.OneChipColorArea,        "One-chip color area"},
+            {ExifSensingMethod.TwoChipColorArea,        "Two-chip color area"},
+            {ExifSensingMethod.ThreeChipColorArea,      "Three-chip color area"},
+            {ExifSensingMethod.ColorSequentialArea,     "Color sequential area"},
+            {ExifSensingMethod.Trilinear,               "Trilinear"},
+            {ExifSensingMethod.ColorSequentialLinear,   "Color sequential linear"}
+        };
+
+        private static readonly Dictionary<ExifExposureMode, string> ExifExposureModeStrings = new Dictionary<ExifExposureMode, string>
+        {
+            {ExifExposureMode.AutoExposure,     "Auto exposure"},
+            {ExifExposureMode.ManualExposure,   "Manual exposure"},
+            {ExifExposureMode.AutoBracket,      "Auto bracket"}
+        };
+
+        private static readonly Dictionary<ExifWhiteBalance, string> ExifWhiteBalanceStrings = new Dictionary<ExifWhiteBalance, string>
+        {
+            {ExifWhiteBalance.AutoWhiteBalance,     "Auto white balance"},
+            {ExifWhiteBalance.ManualWhiteBalance,   "Manual white balance"}
+        };
+
+        private static readonly Dictionary<ExifSceneCaptureType, string> ExifSceneCaptureTypeStrings = new Dictionary<ExifSceneCaptureType, string>
+        {
+            {ExifSceneCaptureType.Standard,     "Standard"},
+            {ExifSceneCaptureType.Landscape,    "Landscape"},
+            {ExifSceneCaptureType.Portrait,     "Portrait"},
+            {ExifSceneCaptureType.Night,        "Night"}
+        };
+
+        private static readonly Dictionary<ExifGainControl, string> ExifGainControlStrings = new Dictionary<ExifGainControl, string>
+        {
+            {ExifGainControl.None,          "None"},
+            {ExifGainControl.LowGainUp,     "Low gain up"},
+            {ExifGainControl.HighGainUp,    "High gain up"},
+            {ExifGainControl.LowGainDown,   "Low gain down"},
+            {ExifGainControl.HighGainDown,  "High gain down"}
+        };
+
+        private static readonly Dictionary<ExifSharpness, string> ExifSharpnessStrings = new Dictionary<ExifSharpness, string>
+        {
+            {ExifSharpness.Normal,  "Normal"},
+            {ExifSharpness.Soft,    "Soft"},
+            {ExifSharpness.Hard,    "Hard"}
+        };
+
+        private static readonly Dictionary<ExifContrastSaturation, string> ExifContrastSaturationStrings = new Dictionary<ExifContrastSaturation, string>
+        {
+            {ExifContrastSaturation.Normal, "Normal"},
+            {ExifContrastSaturation.Low,    "Low"},
+            {ExifContrastSaturation.High,   "High"}
+        };
+
+        private static readonly Dictionary<ExifSubjectDistanceRange, string> ExifSubjectDistanceRangeStrings = new Dictionary<ExifSubjectDistanceRange, string>
+        {
+            {ExifSubjectDistanceRange.Unknown,      "Unknown"},
+            {ExifSubjectDistanceRange.Macro,        "Macro"},
+            {ExifSubjectDistanceRange.CloseView,    "Close view"},
+            {ExifSubjectDistanceRange.DistantView,  "Distant view"},
         };
     }
 }

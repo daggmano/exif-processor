@@ -1,6 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using ExifProcessLib;
+using ExifProcessLib.Models;
 
 namespace ConsoleRunner
 {
@@ -20,8 +22,29 @@ namespace ConsoleRunner
             foreach (var file in filenames)
             {
                 var exifProcessor = new ExifProcessor(file);
-                exifProcessor.ProcessImage();
+                var tags = exifProcessor.ProcessImage();
+
+                if (tags != null)
+                {
+                    Console.WriteLine(file);
+                    Console.WriteLine("==============================================================================");
+                    foreach (var tag in tags)
+                    {
+                        if (tag.IFDType == IFDType.IFD_GPS)
+                        {
+                            Console.WriteLine(tag.GPSTag + ": " + tag.ToDisplayString());
+                        }
+                        else
+                        {
+                            Console.WriteLine(tag.ExifTag + ": " + tag.ToDisplayString());
+                        }
+                    }
+
+                    Console.WriteLine();
+                }
             }
+
+            Console.ReadLine();
         }
     }
 }

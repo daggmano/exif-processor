@@ -4,6 +4,8 @@
     {
         None    = 1,
         Inches  = 2,
-        Cm      = 3
+        Cm      = 3,
+        Mm      = 4,
+        Um      = 5
     }
 }

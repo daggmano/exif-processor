@@ -201,7 +201,7 @@
         Interlace                   = 0x8829,
         TimeZoneOffset              = 0x882A,
         SelfTimerMode               = 0x882B,
-        SensitivityMode             = 0x8830,
+        SensitivityType             = 0x8830,
         StandardOutputSensitivity   = 0x8831,
         RecommendedExposureIndex    = 0x8832,
         ISOSpeed                    = 0x8833,
