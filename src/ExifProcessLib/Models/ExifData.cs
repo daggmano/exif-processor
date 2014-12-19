@@ -87,15 +87,40 @@ namespace ExifProcessLib.Models
                                 var yCbCrPositioningTag = (ExifYCbCrPositioning)(UInt16.Parse(obj.Value));
                                 return GetDisplayString(yCbCrPositioningTag);
 
+                            case ExifTag.ApertureValue:
+                            case ExifTag.MaxApertureValue:
+                                var apertureValue = obj.Value.Split('/').Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
+                                var apexVal1 = (double) apertureValue[0]/apertureValue[1];
+                                var converted1 = Math.Pow(Math.Sqrt(2), apexVal1);
+                                return String.Format("f/{0:0.0}", converted1);
+
+                            case ExifTag.ShutterSpeedValue:
+                                var shutterSpeedValue = obj.Value.Split('/').Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
+                                var apexVal2 = (double)shutterSpeedValue[0] / shutterSpeedValue[1];
+                                var converted2 = Math.Pow(2, apexVal2);
+                                return String.Format("1/{0} s", (int)converted2);
+
+                            case ExifTag.FNumber:
+                                var rationalVals1 = obj.Value.Split('/').Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
+                                return String.Format("f/{0:0.0}", (decimal)rationalVals1[0] / rationalVals1[1]);
+
+                            case ExifTag.ExposureTime:
+                                var rationalVals3 = obj.Value.Split('/').Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
+                                var exposureTime = (decimal) rationalVals3[0]/rationalVals3[1];
+                                if (exposureTime >= 1)
+                                {
+                                    return String.Format("{0} s", exposureTime);
+                                }
+                                return String.Format("1/{0} s", 1 / exposureTime);
+
+                            case ExifTag.FocalLength:
+                                var rationalVals2 = obj.Value.Split('/').Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
+                                return String.Format("{0} mm", (decimal)rationalVals2[0] / rationalVals2[1]);
+
                             case ExifTag.XResolution:
                             case ExifTag.YResolution:
                             case ExifTag.Gamma:
                             case ExifTag.CompressedBitsPerPixel:
-                            case ExifTag.ExposureTime:
-                            case ExifTag.FNumber:
-                            case ExifTag.ApertureValue:
-                            case ExifTag.MaxApertureValue:
-                            case ExifTag.FocalLength:
                             case ExifTag.FlashEnergy:
                             case ExifTag.FlashEnergy2:
                             case ExifTag.FocalPlaneXResolution:
@@ -108,7 +133,6 @@ namespace ExifProcessLib.Models
                                 var rationalVals = obj.Value.Split('/').Select(x => x.Trim()).Select(UInt32.Parse).ToArray();
                                 return String.Format("{0:0.00}", (decimal)rationalVals[0] / rationalVals[1]);
 
-                            case ExifTag.ShutterSpeedValue:
                             case ExifTag.BrightnessValue:
                             case ExifTag.ExposureBiasValue:
                                 var sRationalVals = obj.Value.Split('/').Select(x => x.Trim()).Select(Int32.Parse).ToArray();
